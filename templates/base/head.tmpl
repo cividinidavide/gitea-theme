@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head data-suburl="{{AppSubUrl}}">
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<title>{{if .Title}}{{.Title}} - {{end}}{{AppName}}</title>
+	<meta name="theme-color" content="{{ThemeColorMetaTag}}">
+	<meta name="author" content="{{if .Repository}}{{.Owner.Name}}{{else}}Gitea - Git with a cup of tea{{end}}" />
+	<meta name="description" content="{{if .Repository}}{{.Repository.Name}}{{if .Repository.Description}} - {{.Repository.Description}}{{end}}{{else}}Gitea (Git with a cup of tea) is a painless self-hosted Git service written in Go{{end}}" />
+	<meta name="keywords" content="go, git, self-hosted, gitea">
+	<meta name="referrer" content="no-referrer" />
+	<meta name="_csrf" content="{{.CsrfToken}}" />
+	<meta name="_suburl" content="{{AppSubUrl}}" />
+{{if .GoGetImport}}
+	<meta name="go-import" content="{{.GoGetImport}} git {{.CloneLink.HTTPS}}">
+	<meta name="go-source" content="{{.GoGetImport}} _ {{.GoDocDirectory}} {{.GoDocFile}}">
+{{end}}
+
+	<link rel="shortcut icon" href="{{AppSubUrl}}/img/favicon.png" />
+	<link rel="stylesheet" href="{{AppSubUrl}}/assets/font-awesome-4.6.3/css/font-awesome.min.css">
+	<link rel="stylesheet" href="{{AppSubUrl}}/assets/octicons-4.3.0/octicons.min.css">
+
+{{if .RequireSimpleMDE}}
+	<link rel="stylesheet" href="{{AppSubUrl}}/plugins/simplemde-1.10.1/simplemde.min.css">
+{{end}}
+
+{{if .RequireGitGraph}}
+	<!-- graph -->
+	<link rel="stylesheet" href="{{AppSubUrl}}/css/gitgraph.css">
+{{end}}
+
+	<!-- Stylesheet -->
+	<link rel="stylesheet" href="{{AppSubUrl}}/css/semantic-2.2.1.min.css">
+	<link rel="stylesheet" href="{{AppSubUrl}}/css/index.css?v={{MD5 AppVer}}">
+
+{{if .RequireHighlightJS}}
+	<link rel="stylesheet" href="{{AppSubUrl}}/plugins/highlight-9.6.0/github.css">
+{{end}}
+{{if .RequireMinicolors}}
+	<link rel="stylesheet" href="{{AppSubUrl}}/plugins/jquery.minicolors-2.2.3/jquery.minicolors.css">
+{{end}}
+{{if .RequireDatetimepicker}}
+	<link rel="stylesheet" href="{{AppSubUrl}}/plugins/jquery.datetimepicker-2.4.5/jquery.datetimepicker.css">
+{{end}}
+{{if .RequireDropzone}}
+	<link rel="stylesheet" href="{{AppSubUrl}}/plugins/dropzone-4.2.0/dropzone.css">
+{{end}}
+	<style class="list-search-style"></style>
+
+	<!-- Open Graph -->
+{{if .PageIsUserProfile}}
+	<meta property="og:title" content="{{.Owner.Name}}" />
+	<meta property="og:type" content="profile" />
+	<meta property="og:image" content="{{.Owner.AvatarLink}}" />
+	<meta property="og:url" content="{{.Owner.HTMLURL}}" />
+	<meta property="og:site_name" content="{{AppName}}" />
+{{else if .Repository}}
+	<meta property="og:title" content="{{.Repository.Name}}" />
+	<meta property="og:type" content="object" />
+	<meta property="og:image" content="{{.Repository.Owner.AvatarLink}}" />
+	<meta property="og:url" content="{{.Repository.HTMLURL}}" />
+	{{if .Repository.Description}}
+	<meta property="og:description" content="{{.Repository.Description}}" />
+	{{end}}
+	<meta property="og:site_name" content="{{AppName}}" />
+{{else}}
+	<meta property="og:title" content="{{AppName}}">
+	<meta property="og:type" content="website" />
+	<meta property="og:image" content="{{AppSubUrl}}/img/gitea-lg.png" />
+	<meta property="og:url" content="{{AppUrl}}" />
+	<meta property="og:description" content="Gitea (Git with a cup of tea) is a painless self-hosted Git service written in Go">
+	
+	<style>
+		/* Various styles */
+		.following.bar.light {
+			background-color: #294172 !important;
+		}
+		.ui.secondary.menu .item {
+			color: #DDDDDD !important;
+		}
+		footer {
+			background-color: #294172 !important;
+			color: #DDDDDD !important;
+		}
+		.ui.secondary.menu .active.item {
+			background-color: #1b305b !important;
+		}
+		
+		/* Style The Dropdown Button */
+		.dropbtn {
+			box-shadow: none !important;
+			color: white;
+			padding: 6px 16px;
+			font-size: 16px;
+			border: none;
+			cursor: pointer;
+			border: 1px solid #DDDDDD;
+    		border-radius: 3px;
+		}
+		/* The container <div> - needed to position the dropdown content */
+		.dropdown {
+			position: relative;
+			display: inline-block;
+		}
+		/* Dropdown Content (Hidden by Default) */
+		.dropdown-content {
+			display: none;
+			position: absolute;
+			background-color: #f9f9f9;
+			min-width: 160px;
+			box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+			z-index: 1;
+		}
+		/* Links inside the dropdown */
+		.dropdown-content a {
+			color: black !important;
+			padding: 12px 16px;
+			text-decoration: none;
+			display: block;
+		}
+		/* Change color of dropdown links on hover */
+		.dropdown-content a:hover {
+			background-color: #f1f1f1
+		}
+		/* Show the dropdown menu on hover */
+		.dropdown:hover .dropdown-content {
+			display: block;
+		}
+		/* Change the background color of the dropdown button when the dropdown content is shown */
+		.dropdown:hover .dropbtn {
+			background-color: #3e8e41;
+		}
+	</style>
+{{end}}
+</head>
+<body>
+	<div class="full height">
+		<noscript>Please enable JavaScript in your browser!</noscript>
+
+		{{if not .PageIsInstall}}
+			<div class="following bar light">
+				<div class="ui container">
+					<div class="ui grid">
+						<div class="column">
+							<div class="ui top secondary menu">
+							<div class="dropdown" style="float: left; margin-right: 10px; margin-top: 8px">
+							  <button class="dropbtn" style="font-weight: bold; background-color: transparent; color: #deddef; border-color: #deddef; box-shadow: none; height: 36px !important">
+								  <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+Cjxz
+						dmcKICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICB4bWxu
+						czpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIgogICB4bWxuczpyZGY9Imh0dHA6
+						Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiCiAgIHhtbG5zOnN2Zz0iaHR0
+						cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAw
+						L3N2ZyIKICAgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIKICAgd2lkdGg9IjI0cHgiCiAgIHZpZXdCb3g9
+						IjAgMCAyNCAyNCIKICAgdmVyc2lvbj0iMS4xIgogICBpZD0iTGF5ZXJfMSIKICAgaGVpZ2h0PSIy
+						NHB4IgogICBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCAyNCAyNCI+PG1ldGFkYXRhCiAgICAg
+						aWQ9Im1ldGFkYXRhMzc1OCI+PHJkZjpSREY+PGNjOldvcmsKICAgICAgICAgcmRmOmFib3V0PSIi
+						PjxkYzpmb3JtYXQ+aW1hZ2Uvc3ZnK3htbDwvZGM6Zm9ybWF0PjxkYzp0eXBlCiAgICAgICAgICAg
+						cmRmOnJlc291cmNlPSJodHRwOi8vcHVybC5vcmcvZGMvZGNtaXR5cGUvU3RpbGxJbWFnZSIgLz48
+						ZGM6dGl0bGU+PC9kYzp0aXRsZT48L2NjOldvcms+PC9yZGY6UkRGPjwvbWV0YWRhdGE+PGRlZnMK
+						ICAgICBpZD0iZGVmczM3NTYiIC8+PGcKICAgICBpZD0iZzM3NTEiPjxnCiAgICAgICBpZD0iZzM3
+						NDkiPjxwYXRoCiAgICAgICAgIGlkPSJwYXRoMzc0NyIKICAgICAgICAgZD0iTTIzLjI0NCwxNy4w
+						MDlIMC43NWMtMC40MTMsMC0wLjc1LDAuMzYtMC43NSwwLjgwMXYzLjQyMUMwLDIxLjY1NCwwLjMz
+						NywyMiwwLjc1LDIyaDIyLjQ5NGMwLjQxNCwwLDAuNzUtMC4zNDYsMC43NS0wLjc3ICAgIFYxNy44
+						MUMyMy45OTQsMTcuMzY5LDIzLjY1OCwxNy4wMDksMjMuMjQ0LDE3LjAwOXogTTIzLjI0NCw5LjAw
+						OUgwLjc1QzAuMzM3LDkuMDA5LDAsOS4zNjksMCw5LjgxdjMuNDIxICAgIGMwLDAuNDI0LDAuMzM3
+						LDAuNzY5LDAuNzUsMC43NjloMjIuNDk0YzAuNDE0LDAsMC43NS0wLjM0NSwwLjc1LTAuNzY5Vjku
+						ODFDMjMuOTk0LDkuMzY5LDIzLjY1OCw5LjAwOSwyMy4yNDQsOS4wMDl6ICAgICBNMjMuMjQ0LDEu
+						MDA5SDAuNzVDMC4zMzcsMS4wMDksMCwxLjM2OSwwLDEuODFWNS4yM2MwLDAuNDIzLDAuMzM3LDAu
+						NzY5LDAuNzUsMC43NjloMjIuNDk0YzAuNDE0LDAsMC43NS0wLjM0NiwwLjc1LTAuNzY5VjEuODEg
+						ICAgQzIzLjk5NCwxLjM2OSwyMy42NTgsMS4wMDksMjMuMjQ0LDEuMDA5eiIgLz48L2c+PC9nPjxw
+						YXRoCiAgICAgaWQ9InBhdGgzNzYwIgogICAgIGQ9Ik0gMC41MzU3MDQ3Niw1LjkzNzYxNTUgQyAw
+						LjM0Njk5OTU3LDUuODcwMzQzOCAwLjE2MDA3MTQsNS43MDAxMzgzIDAuMDg2Nzg0MjgsNS41Mjg4
+						NTUzIDAuMDQyNzQxOTMsNS40MjU5MjE2IDAuMDMxODkzNjksNS4wMjU3NDM1IDAuMDMxODkzNjks
+						My41MDQwMTEyIGMgMCwtMS44MDM3MDk3IDAuMDAzODE3OCwtMS45MDQwNCAwLjA3Nzk4NjA1LC0y
+						LjA0OTQyMTcgQyAwLjIwODIxNzk4LDEuMjYxODMwNiAwLjM5MDE0MTg5LDEuMTA3MzM3MiAwLjU4
+						MTMwNDUyLDEuMDU0MjQ2MSAwLjc5MDE4MDE5LDAuOTk2MjM1NjQgMjMuMTk2MTQsMC45OTY4NjY2
+						IDIzLjQwNTA3NiwxLjA1NDg4ODggYyAwLjE3NTkxOSwwLjA0ODg1MyAwLjQwMjkzLDAuMjM2MjUg
+						MC40OTkyODYsMC40MTIxNTg4IDAuMDYxMDcsMC4xMTE0OTMgMC4wNjc3MywwLjMxMTc5MzcgMC4w
+						Njc3MywyLjAzNzI3MTMgMCwxLjkwMjQ0NjUgLTUuMThlLTQsMS45MTQ1OTEzIC0wLjA4ODgsMi4w
+						Nzk2OTkzIEMgMjMuNzc5Njk5LDUuNzc3NzY2IDIzLjYzNjY5Myw1Ljg4OTcwNDkgMjMuNDEzOTUs
+						NS45NTEzOTk2IDIzLjI5ODk1NSw1Ljk4MzI1MDYgMjAuMTA4MDQyLDUuOTk1MTQyNiAxMS45NzIw
+						OSw1Ljk5NDA0MDYgMi40OTUwODg1LDUuOTkyNzU3MyAwLjY2NTA1ODgyLDUuOTgzNzI5IDAuNTM1
+						NzA0NzYsNS45Mzc2MTU1IFoiCiAgICAgc3R5bGU9ImZpbGw6I2RlZGRlZjtzdHJva2Utd2lkdGg6
+						MC4wMzk4NjcxMTtzdHJva2U6I2RlZGRlZjtzdHJva2Utb3BhY2l0eToxO2ZpbGwtb3BhY2l0eTox
+						IiAvPjxwYXRoCiAgICAgaWQ9InBhdGg0NTY3IgogICAgIGQ9Ik0gMC40MDQ1NTMzMywxMy44ODY5
+						MzcgQyAwLjMyMjI3MzYsMTMuODQzNSAwLjIwNTY2MjMsMTMuNzMzNTAyIDAuMTQ1NDE3MTEsMTMu
+						NjQyNDk2IEwgMC4wMzU4ODA0LDEzLjQ3NzAzIDAuMDIzNTMxNSwxMS42MDAzMDkgQyAwLjAxNTE4
+						MzUyLDEwLjMzMTYyNyAwLjAyNTIxNTAyLDkuNjc1NzMzMSAwLjA1NDQ5Mzg3LDkuNTc1ODgzIDAu
+						MTEyOTQ4MjcsOS4zNzY1MzUyIDAuMjc3NjU1NDcsOS4xODk0NzgzIDAuNDcyNzY5Myw5LjEwMDg1
+						MDQgMC42Mjc4NjE0OSw5LjAzMDQwMTggMS4wNTkyNDQ4LDkuMDI3NjMyIDEyLjAwNzU2OCw5LjAy
+						Njc4OTIgYyAxMS4yMTA5MTUsLTguNjMxZS00IDExLjM3NTg2OSwyLjQwNGUtNCAxMS41MjY1NDcs
+						MC4wNzcxMSAwLjE5MTMzNiwwLjA5NzYxMyAwLjM0NzE5MiwwLjI4MDA0MzEgMC40MDMyMjksMC40
+						NzE5ODMzIDAuMDI5MDIsMC4wOTk0MDIgMC4wMzkxNSwwLjc2MTQzOTUgMC4wMzA5NiwyLjAyNDQx
+						NjUgbCAtMC4wMTIxNiwxLjg3NjcxMyAtMC4xMDk2NzksMC4xNjU2ODkgYyAtMC4wNjAzMiwwLjA5
+						MTEzIC0wLjE4MDcwNSwwLjIwMTkyNCAtMC4yNjc1MTUsMC4yNDYyMTIgLTAuMTU3Mjg4LDAuMDgw
+						MjQgLTAuMTk3NDksMC4wODA1MiAtMTEuNTkxMzE3LDAuMDc4NzYgLTExLjMxODE3Mzg2LC0wLjAw
+						MTcgLTExLjQzNDk5MDkxLC0wLjAwMjYgLTExLjU4MzA4MTY3LC0wLjA4MDc0IHoiCiAgICAgc3R5
+						bGU9ImZpbGw6I2EwYTBhMDtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MC4wMzk4NjcxMXB4O3N0
+						cm9rZS1saW5lY2FwOmJ1dHQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1vcGFjaXR5OjEi
+						IC8+PHBhdGgKICAgICBpZD0icGF0aDQ1NjkiCiAgICAgZD0iTSAwLjQ3NDQxODYsMjEuOTI2MjE4
+						IEMgMC4zMTcxNzE0LDIxLjg1NjAzIDAuMTU0NzMwNjEsMjEuNjc5NjQ5IDAuMDc3ODYyMzcsMjEu
+						NDk1NjMzIDAuMDI0OTA5OCwyMS4zNjg4NjggMC4wMTU5NDY4NCwyMS4wNzk5OTkgMC4wMTU5NDY4
+						NCwxOS41MDAxMzggdiAtMS44NDcyNzMgbCAwLjA5ODM3ODA4LC0wLjE5NzQxOSBjIDAuMDY0NjE2
+						MiwtMC4xMjk2NjggMC4xNTYyODY0OSwtMC4yMzQ5NjggMC4yNjcxMTYzMywtMC4zMDY4MzEgbCAw
+						LjE2ODczODMsLTAuMTA5NDEyIEggMTEuOTkwNTI0IDIzLjQzMDg2OCBsIDAuMTY5MDg0LDAuMDk5
+						MDkgYyAwLjEyMDczMywwLjA3MDc2IDAuMTk4Njg3LDAuMTU4NDk1IDAuMjcyNjA2LDAuMzA2ODMx
+						IGwgMC4xMDM1MjIsMC4yMDc3NDIgLTguNzdlLTQsMS44NTU5NTkgYyAtOC4xNGUtNCwxLjcyMTQz
+						MyAtMC4wMDYyLDEuODY3NTE5IC0wLjA3NDcxLDIuMDE1NDI4IC0wLjA4NTkzLDAuMTg1NjExIC0w
+						LjI1NTgyOSwwLjM1NTc4NCAtMC40MTUzODUsMC40MTYwNjkgLTAuMDc4MzgsMC4wMjk2MSAtMy41
+						NDc4NywwLjA0MTkzIC0xMS41MDE2NjEsMC4wNDA4NCAtOS40MjY5NDA3LC0wLjAwMTMgLTExLjQx
+						MDAzODMzLC0wLjAxMDc2IC0xMS41MDkwMzE0LC0wLjA1NDk1IHoiCiAgICAgc3R5bGU9ImZpbGw6
+						I2EwYTBhMDtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MC4wMzk4NjcxMXB4O3N0cm9rZS1saW5l
+						Y2FwOmJ1dHQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1vcGFjaXR5OjEiIC8+PHBhdGgK
+						ICAgICBpZD0icGF0aDQ1NzEiCiAgICAgZD0iTSAwLjYxMzk1MzQ5LDUuOTk5MDY1MSBDIDAuNTM3
+						MjA5Myw1Ljk4MzU3OTEgMC40MzY1MTM1NSw1Ljk1MDMzMjggMC4zOTAxODUxNCw1LjkyNTE4NDIg
+						MC4yNTA0NjA4OSw1Ljg0OTMzNjIgMC4wNjI3ODQ5Niw1LjYwODk2MTUgMC4wMTgzNDM5OSw1LjQ0
+						ODkzMDEgLTAuMDA3OTc4MzEsNS4zNTQxNDQxIC0wLjAyMzU1Nzk5LDQuNjMxNjg0MyAtMC4wMjM2
+						OTc5MywzLjQ5OTM2NDUgLTAuMDIzODg1NTEsMS45ODE1OTY0IC0wLjAxNDMzMDQ2LDEuNjczMjA5
+						OCAwLjAzNzQyOTA3LDEuNTI2NTA3NiAwLjEwNTYzMDExLDEuMzMzMjA1MyAwLjI1MzQ0Mzc5LDEu
+						MTU5MTU1OSAwLjQzNDU1MTUsMS4wNTg4OTkzIDAuNTQ1MjI4NTMsMC45OTc2MzEzIDEuNDA3OTEx
+						NywwLjk5MjY5MTAzIDExLjk5NjAxMywwLjk5MjY5MTAzIGMgMTAuNjkwODUxLDAgMTEuNDQ5OTc3
+						LDAuMDA0NDQ2IDExLjU2NTUxMSwwLjA2NzczMDkgMC4xNzU5MDksMC4wOTYzNTYgMC4zNjMzMDYs
+						MC4zMjMzNjc1IDAuNDEyMTU5LDAuNDk5Mjg1NyAwLjAyNjM2LDAuMDk0OTM0IDAuMDQxOSwwLjgy
+						NTE3MSAwLjA0MjA0LDEuOTc1NzkyMiAyZS00LDEuNTYwMjU1MiAtMC4wMDg4LDEuODQ2NzE2MyAt
+						MC4wNjE2OSwxLjk3MzQyMTkgLTAuMDcyODMsMC4xNzQzNTA1IC0wLjIyOTE5OSwwLjM0ODE3Mjcg
+						LTAuMzk2NTU2LDAuNDQwODE3IC0wLjExMDYwMiwwLjA2MTIyNyAtMC45NzI5OTcsMC4wNjY2MzIg
+						LTExLjQ2MTc5NCwwLjA3MTg0NSAtNi4yMzgyMDU5LDAuMDAzMSAtMTEuNDA0OTgzMzMsLTAuMDA3
+						MDMgLTExLjQ4MTcyNzUxLC0wLjAyMjUxOSB6IgogICAgIHN0eWxlPSJmaWxsOiNkZWRkZWY7c3Ry
+						b2tlOiNkZWRkZWY7c3Ryb2tlLXdpZHRoOjAuMDQ7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2Ut
+						bGluZWpvaW46bWl0ZXI7c3Ryb2tlLW9wYWNpdHk6MTtmaWxsLW9wYWNpdHk6MTtzdHJva2UtbWl0
+						ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZSIgLz48cGF0aAogICAgIGlkPSJwYXRoNDU3
+						MyIKICAgICBkPSJNIDAuNTMwNzczNjMsMTMuOTcxMzQgQyAwLjM0OTc0ODA1LDEzLjkxNjIzNSAw
+						LjIxNDk2NDQsMTMuODAzNjczIDAuMTA0MDEzOTQsMTMuNjE0OTQyIEwgLTAuMDAzOTg2NzEsMTMu
+						NDMxMjI5IFYgMTEuNTE3NjA4IDkuNjAzOTg2NyBMIDAuMDk1NjgxMDYsOS40MjYzNTUgQyAwLjE1
+						MDQ5ODM0LDkuMzI4NjU3NiAwLjI3MzE0MDA5LDkuMTk0MTA2MSAwLjM2ODIxODI5LDkuMTI3MzUx
+						NyBMIDAuNTQxMDg3NzMsOS4wMDU5ODAxIEggMTEuOTg5NDgxIGMgMTAuNzc1NDY5LDAgMTEuNDU1
+						Nzk4LDAuMDA0MDUgMTEuNTc0MzczLDAuMDY4OTM2IDAuMTk3MTQyLDAuMTA3ODc1NiAwLjM2NDcx
+						NSwwLjM0MDA3ODkgMC40MTI4OSwwLjU3MjEzNzkgMC4wMjgyMSwwLjEzNTg3MjkgMC4wMzg5NSww
+						LjgyMzg2NiAwLjAzMTE2LDEuOTk1NzY0IGwgLTAuMDExODksMS43ODg0MTEgLTAuMTA5MjgxLDAu
+						MTg1ODk5IGMgLTAuMDYwMTEsMC4xMDIyNDUgLTAuMTc2NzE3LDAuMjI3ODI3IC0wLjI1OTEzNyww
+						LjI3OTA3IGwgLTAuMTQ5ODU0LDAuMDkzMTcgLTExLjQyMTkyNywwLjAwNjcgYyAtNi4yODIwNTk4
+						LDAuMDAzNyAtMTEuNDY4MzI4MDEsLTAuMDA3NCAtMTEuNTI1MDQwMzcsLTAuMDI0NzEgeiIKICAg
+						ICBzdHlsZT0iZmlsbDojZGVkZGVmO3N0cm9rZTojZGVkZGVmO3N0cm9rZS13aWR0aDowLjAzOTg2
+						NzExcHg7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW9w
+						YWNpdHk6MTtmaWxsLW9wYWNpdHk6MSIgLz48cGF0aAogICAgIGlkPSJwYXRoNDU3NSIKICAgICBk
+						PSJtIDAuNjczNzU0MTUsMjIuMDAzMTc2IGMgLTAuMDIxOTI2OSwtMC4wMDc0IC0wLjA4OTY1NSwt
+						MC4wMjQ0NyAtMC4xNTA1MDY3NSwtMC4wMzc5MSAtMC4wNjA4NTE4LC0wLjAxMzQ0IC0wLjE4MTg0
+						NTU3LC0wLjA4ODc2IC0wLjI2ODg3NTAxLC0wLjE2NzM4OSAtMC4yNzA3MDIwOSwtMC4yNDQ1NjMg
+						LTAuMjc4MjkyNjYsLTAuMzA1OTk2IC0wLjI3ODI5MjY2LC0yLjI1MjMyIDAsLTEuMTAyNzU3IDAu
+						MDE1NjkyMDMsLTEuNzc4MjU3IDAuMDQ0NDIxMjksLTEuOTEyMjE3IDAuMDU1Mzk1NjIsLTAuMjU4
+						MzAxIDAuMjgxMTc1OTEsLTAuNTE5NzU2IDAuNTA3MzU1NDYsLTAuNTg3NTIxIDAuMjA1MTc2Njgs
+						LTAuMDYxNDcgMjIuNzE0NDk2NTIsLTAuMDY3MTMgMjIuOTM1NDIzNTIsLTAuMDA1OCAwLjIxODQ3
+						NywwLjA2MDY5IDAuNDU0MDE1LDAuMzM3Njg0IDAuNTExNzYxLDAuNjAxODQ1IDAuMDMzMjUsMC4x
+						NTIxMDcgMC4wNDMxMywwLjczNjg2MiAwLjAzMzk0LDIuMDA4NTk1IC0wLjAxMTQzLDEuNTgxNDcy
+						IC0wLjAyMDgxLDEuODA4MTkgLTAuMDc5MTcsMS45MTM2MjIgLTAuMDc1NjcsMC4xMzY2ODkgLTAu
+						MjQ2NDQ3LDAuMzAzNzk4IC0wLjM5MjI2MywwLjM4MzgzMyAtMC4wODM3MiwwLjA0NTk1IC0xLjkx
+						NzE4OSwwLjA1NTgyIC0xMS40NjE3OTQsMC4wNjE3IC02LjI0OTE2OTksMC4wMDM4IC0xMS4zODAw
+						NjY5NCw5LjMzZS00IC0xMS40MDE5OTM4NSwtMC4wMDY1IHoiCiAgICAgc3R5bGU9ImZpbGw6I2Rl
+						ZGRlZjtzdHJva2U6I2RlZGRlZjtzdHJva2Utd2lkdGg6MC4wMzk4NjcxMXB4O3N0cm9rZS1saW5l
+						Y2FwOmJ1dHQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1vcGFjaXR5OjE7ZmlsbC1vcGFj
+						aXR5OjEiIC8+PC9zdmc+" style="height: 12px; margin-top: 6px" />
+
+							  </button>
+							  <div class="dropdown-content">
+								<a href="http://wescrum.sorint.it">WeScrum</a>
+								<a href="http://weshare.sorint.it">WeShare</a>
+								<a href="http://gitlab.dev.sorint.it">GitLab</a>
+								<a href="http://jenkins.dev.sorint.it">Jenkins</a>
+								<a href="http://sonar.dev.sorint.it">SonarQube</a>
+							  </div>
+							</div>
+    
+    
+    
+								<a class="item brand" href="{{AppSubUrl}}/">
+									<img class="ui mini image" src="http://localhost:3000/img/favicon.png">
+								</a>
+
+								{{if .IsSigned}}
+									<a class="item{{if .PageIsDashboard}} active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "dashboard"}}</a>
+									<a class="item{{if .PageIsIssues}} active{{end}}" href="{{AppSubUrl}}/issues">{{.i18n.Tr "issues"}}</a>
+									<a class="item{{if .PageIsPulls}} active{{end}}" href="{{AppSubUrl}}/pulls">{{.i18n.Tr "pull_requests"}}</a>
+								{{else}}
+									<a class="item{{if .PageIsHome}} active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "home"}}</a>
+								{{end}}
+
+								<a class="item{{if .PageIsExplore}} active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "explore"}}</a>
+								{{/*<div class="item">
+									<div class="ui icon input">
+									<input class="searchbox" type="text" placeholder="{{.i18n.Tr "search_project"}}">
+									<i class="search icon"></i>
+									</div>
+									</div>*/}}
+
+								{{if .IsSigned}}
+									<div class="right menu">
+										<a href="{{AppSubUrl}}/notifications" class="ui head link jump item poping up" data-content='{{.i18n.Tr "notifications"}}' data-variation="tiny inverted">
+											<span class="text">
+												<i class="octicon octicon-inbox"><span class="sr-only">{{.i18n.Tr "notifications"}}</span></i>
+
+												{{if .NotificationUnreadCount}}
+													<span class="ui red label">
+														{{.NotificationUnreadCount}}
+													</span>
+												{{end}}
+											</span>
+										</a>
+
+										<div class="ui dropdown head link jump item poping up" data-content="{{.i18n.Tr "create_new"}}" data-variation="tiny inverted">
+											<span class="text">
+												<i class="octicon octicon-plus"><span class="sr-only">{{.i18n.Tr "create_new"}}</span></i>
+												<i class="octicon octicon-triangle-down"></i>
+											</span>
+											<div class="menu">
+												<a class="item" href="{{AppSubUrl}}/repo/create">
+													<i class="octicon octicon-plus"></i> {{.i18n.Tr "new_repo"}}
+												</a>
+												<a class="item" href="{{AppSubUrl}}/repo/migrate">
+													<i class="octicon octicon-repo-clone"></i> {{.i18n.Tr "new_migrate"}}
+												</a>
+												{{if .SignedUser.CanCreateOrganization}}
+												<a class="item" href="{{AppSubUrl}}/org/create">
+													<i class="octicon octicon-organization"></i> {{.i18n.Tr "new_org"}}
+												</a>
+												{{end}}
+											</div><!-- end content create new menu -->
+										</div><!-- end dropdown menu create new -->
+
+										<div class="ui dropdown head link jump item poping up" tabindex="-1" data-content="{{.i18n.Tr "user_profile_and_more"}}" data-variation="tiny inverted">
+											<span class="text avatar">
+												<img class="ui small rounded image" src="{{.SignedUser.RelAvatarLink}}">
+												<span class="sr-only">{{.i18n.Tr "user_profile_and_more"}}</span>
+												<i class="octicon octicon-triangle-down" tabindex="-1"></i>
+											</span>
+											<div class="menu" tabindex="-1">
+												<div class="ui header">
+													{{.i18n.Tr "signed_in_as"}} <strong>{{.SignedUser.Name}}</strong>
+												</div>
+
+												<div class="divider"></div>
+												<a class="item" href="{{AppSubUrl}}/{{.SignedUser.Name}}">
+													<i class="octicon octicon-person"></i>
+													{{.i18n.Tr "your_profile"}}<!-- Your profile -->
+												</a>
+												<a class="item" href="{{AppSubUrl}}/{{.SignedUser.Name}}?tab=stars">
+													<i class="octicon octicon-star"></i>
+													{{.i18n.Tr "your_starred"}}
+												</a>
+												<a class="{{if .PageIsUserSettings}}active{{end}} item" href="{{AppSubUrl}}/user/settings">
+													<i class="octicon octicon-settings"></i>
+													{{.i18n.Tr "your_settings"}}<!-- Your settings -->
+												</a>
+												<a class="item" target="_blank" rel="noopener" href="https://docs.gitea.io" rel="noreferrer">
+													<i class="octicon octicon-question"></i>
+													{{.i18n.Tr "help"}}<!-- Help -->
+												</a>
+												{{if .IsAdmin}}
+													<div class="divider"></div>
+
+													<a class="{{if .PageIsAdmin}}active{{end}} item" href="{{AppSubUrl}}/admin">
+														<i class="icon settings"></i>
+														{{.i18n.Tr "admin_panel"}}<!-- Admin Panel -->
+													</a>
+												{{end}}
+
+												<div class="divider"></div>
+												<a class="item" href="{{AppSubUrl}}/user/logout">
+													<i class="octicon octicon-sign-out"></i>
+													{{.i18n.Tr "sign_out"}}<!-- Sign Out -->
+												</a>
+											</div><!-- end content avatar menu -->
+										</div><!-- end dropdown avatar menu -->
+									</div><!-- end signed user right menu -->
+
+								{{else}}
+
+									<a class="item" target="_blank" rel="noopener" href="https://docs.gitea.io" rel="noreferrer">{{.i18n.Tr "help"}}</a>
+									<div class="right menu">
+										{{if .ShowRegistrationButton}}
+											<a class="item{{if .PageIsSignUp}} active{{end}}" href="{{AppSubUrl}}/user/sign_up">
+												<i class="octicon octicon-person"></i> {{.i18n.Tr "register"}}
+											</a>
+										{{end}}
+										<a class="item{{if .PageIsSignIn}} active{{end}}" href="{{AppSubUrl}}/user/login?redirect_to={{.Link}}">
+											<i class="octicon octicon-sign-in"></i> {{.i18n.Tr "sign_in"}}
+										</a>
+									</div><!-- end anonymous right menu -->
+
+								{{end}}
+							</div><!-- end top menu -->
+						</div><!-- end column -->
+					</div><!-- end grid -->
+				</div><!-- end container -->
+			</div><!-- end bar -->
+		{{end}}
+{{/*
+	</div>
+</body>
+</html>
+*/}}
